@@ -1,6 +1,7 @@
 package leongcheewah.invoicemanagement.service
 
 import leongcheewah.invoicemanagement.entity.Invoice
+import leongcheewah.invoicemanagement.exception.InvoiceException
 import leongcheewah.invoicemanagement.model.InvoiceVO
 import leongcheewah.invoicemanagement.repository.InvoiceRepository
 import org.apache.commons.csv.CSVFormat
@@ -14,6 +15,7 @@ import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
+import java.util.stream.Collectors
 
 
 @Service
@@ -23,7 +25,7 @@ class InvoiceService() : IInvoiceService {
     private val invoiceRepository: InvoiceRepository? = null
 
     override fun getInvoices(): List<Invoice> {
-        var invoiceList : List<Invoice>
+        var invoiceList: List<Invoice>
         invoiceList = invoiceRepository?.findAll() as List<Invoice>;
         return invoiceList
     }
@@ -31,6 +33,8 @@ class InvoiceService() : IInvoiceService {
     override fun createInvoice(invoiceData: InvoiceVO) {
         println("start InvoiceService:createInvoice")
         try {
+            val invoiceVO = invoiceRepository?.findByInvoiceNo(invoiceData.invoiceNo)
+
             var invoice = Invoice();
             invoice.invoiceNo = invoiceData.invoiceNo;
             invoice.invoiceDate = invoiceData.invoiceDate?.let { convertDateStrToDate(it) }
@@ -50,13 +54,35 @@ class InvoiceService() : IInvoiceService {
     }
 
     override fun uploadInvoices(file: MultipartFile) {
-        val csvRecords = parseCsv(file)
+        var csvRecords = parseCsv(file)
         println(csvRecords?.size)
+
+        if (csvRecords == null || csvRecords.isEmpty()) {
+            throw InvoiceException("CSV File is empty");
+        }
+        val csvInvoiceNoSet: MutableSet<String?> = HashSet()
+        val invoiceList: MutableList<Invoice> = ArrayList()
+
+        for (csvRecord in csvRecords) {
+            csvInvoiceNoSet.add(csvRecord["InvoiceNo"])
+
+            val createInvoice = Invoice()
+            createInvoice.invoiceNo = csvRecord["InvoiceNo"]
+            createInvoice.invoiceDate = let { convertDateStrToDate(csvRecord["InvoiceDate"]) }
+            createInvoice.customerId = csvRecord["CustomerID"]
+            createInvoice.country = csvRecord["Country"]
+            createInvoice.stockCode = csvRecord["StockCode"]
+            createInvoice.description = csvRecord["Description"]
+            createInvoice.quantity = csvRecord["Quantity"].toInt()
+            createInvoice.unitPrice = csvRecord["UnitPrice"].toDouble()
+            invoiceList.add(createInvoice)
+        }
+        invoiceRepository?.saveAll(invoiceList);
     }
 
     fun convertDateStrToDate(invoiceDate: String): LocalDateTime {
         val formatter = DateTimeFormatterBuilder()
-            .appendOptional(DateTimeFormatter.ofPattern("MM/d/yyyy H:m"))
+            .appendOptional(DateTimeFormatter.ofPattern("M/d/yyyy H:m"))
             .appendOptional(DateTimeFormatter.ofPattern("d-MM-yy H:m"))
             .toFormatter()
 

@@ -5,4 +5,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface InvoiceRepository : CrudRepository<Invoice, String>
+interface InvoiceRepository : CrudRepository<Invoice, String> {
+    fun findByInvoiceNo(invoiceNo: String?)
+}
