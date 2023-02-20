@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/invoice")
@@ -34,6 +36,14 @@ class InvoiceController {
         returnMsgObj["message"] = "Success"
         println("end ----- createInvoice")
         return ResponseEntity.status(HttpStatus.OK).body(returnMsgObj);
+    }
 
+    @PostMapping(path = ["/upload"], consumes = ["multipart/form-data"], produces = ["application/json"])
+    fun uploadEmployees(@RequestParam("file") file: MultipartFile): ResponseEntity<Any> {
+        val returnMsgObj: MutableMap<String, Any> = HashMap()
+
+        invoiceSvc?.uploadInvoices(file)
+        returnMsgObj["message"] = "Success"
+        return ResponseEntity.status(HttpStatus.OK).body(returnMsgObj)
     }
 }

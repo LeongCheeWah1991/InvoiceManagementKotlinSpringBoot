@@ -3,8 +3,14 @@ package leongcheewah.invoicemanagement.service
 import leongcheewah.invoicemanagement.entity.Invoice
 import leongcheewah.invoicemanagement.model.InvoiceVO
 import leongcheewah.invoicemanagement.repository.InvoiceRepository
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
+import org.apache.commons.csv.CSVRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -43,6 +49,11 @@ class InvoiceService() : IInvoiceService {
 
     }
 
+    override fun uploadInvoices(file: MultipartFile) {
+        val csvRecords = parseCsv(file)
+        println(csvRecords?.size)
+    }
+
     fun convertDateStrToDate(invoiceDate: String): LocalDateTime {
         val formatter = DateTimeFormatterBuilder()
             .appendOptional(DateTimeFormatter.ofPattern("MM/d/yyyy H:m"))
@@ -52,5 +63,21 @@ class InvoiceService() : IInvoiceService {
         var formattedDateTime = LocalDateTime.parse(invoiceDate, formatter)
 
         return formattedDateTime;
+    }
+
+    fun parseCsv(file: MultipartFile): List<CSVRecord>? {
+        var csvRecords: List<CSVRecord>? = null
+        try {
+            val fileReader = BufferedReader(InputStreamReader(file.inputStream, "UTF-8"))
+            val csvParser = CSVParser(
+                fileReader,
+                CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim()
+            )
+            csvRecords = csvParser.records
+            csvParser.close()
+        } catch (ex: Exception) {
+            return null
+        }
+        return csvRecords
     }
 }
