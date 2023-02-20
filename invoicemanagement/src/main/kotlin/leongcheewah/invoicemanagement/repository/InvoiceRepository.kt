@@ -1,6 +1,6 @@
 package leongcheewah.invoicemanagement.repository
 
-import leongcheewah.invoicemanagement.model.Invoice
+import leongcheewah.invoicemanagement.entity.Invoice
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 

@@ -8,5 +8,5 @@ create table invoice
     stock_code      VARCHAR(50),
     description     VARCHAR(256),
     quantity        INTEGER,
-    unit_price      DOUBLE,
+    unit_price      DOUBLE
     );
