@@ -5,6 +5,7 @@ import leongcheewah.invoicemanagement.service.InvoiceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/invoice")
+@CrossOrigin(origins = arrayOf("http://localhost:3000"), allowCredentials= "true")
 class InvoiceController {
 
     @Autowired
@@ -38,7 +40,7 @@ class InvoiceController {
         return ResponseEntity.status(HttpStatus.OK).body(returnMsgObj);
     }
 
-    @PostMapping(path = ["/upload"], consumes = ["multipart/form-data"], produces = ["application/json"])
+    @PostMapping("/upload", consumes = ["multipart/form-data"], produces = ["application/json"])
     fun uploadEmployees(@RequestParam("file") file: MultipartFile): ResponseEntity<Any> {
         val returnMsgObj: MutableMap<String, Any> = HashMap()
 
