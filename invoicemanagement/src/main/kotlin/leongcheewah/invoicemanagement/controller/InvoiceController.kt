@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/invoice")
 @CrossOrigin(origins = arrayOf("http://localhost:3000"), allowCredentials = "true")
-class InvoiceController {
+class InvoiceController : BaseController() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
