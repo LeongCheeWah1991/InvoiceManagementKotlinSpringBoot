@@ -7,6 +7,7 @@ import leongcheewah.invoicemanagement.repository.InvoiceRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -21,19 +22,25 @@ import java.util.stream.Collectors
 @Service
 class InvoiceService() : IInvoiceService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Autowired
     private val invoiceRepository: InvoiceRepository? = null
 
     override fun getInvoices(): List<Invoice> {
+        logger.info("Service: {}.{} is started", this.javaClass, "getInvoices")
+
         var invoiceList: List<Invoice>
         invoiceList = invoiceRepository?.findAll() as List<Invoice>;
+
+        logger.info("Service: {}.{} is ended", this.javaClass, "getInvoices")
         return invoiceList
     }
 
     override fun createInvoice(invoiceData: InvoiceVO) {
-        println("start InvoiceService:createInvoice")
+        logger.info("Service: {}.{} is started", this.javaClass, "createInvoice")
+
         try {
-            val invoiceVO = invoiceRepository?.findByInvoiceNo(invoiceData.invoiceNo)
 
             var invoice = Invoice();
             invoice.invoiceNo = invoiceData.invoiceNo;
@@ -47,37 +54,49 @@ class InvoiceService() : IInvoiceService {
 
             invoiceRepository?.save(invoice);
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            logger.error("Error", ex)
+            throw InvoiceException("Failed to create Invoice");
         }
-        println("end InvoiceService:createInvoice")
 
+        logger.info("Service: {}.{} is ended", this.javaClass, "createInvoice")
     }
 
     override fun uploadInvoices(file: MultipartFile) {
-        var csvRecords = parseCsv(file)
-        println(csvRecords?.size)
+        logger.info("Service: {}.{} is started", this.javaClass, "uploadInvoices")
 
-        if (csvRecords == null || csvRecords.isEmpty()) {
-            throw InvoiceException("CSV File is empty");
+        try {
+
+            var csvRecords = parseCsv(file)
+            println(csvRecords?.size)
+
+            if (csvRecords == null || csvRecords.isEmpty()) {
+                throw InvoiceException("CSV File is empty");
+            }
+            val csvInvoiceNoSet: MutableSet<String?> = HashSet()
+            val invoiceList: MutableList<Invoice> = ArrayList()
+
+            for (csvRecord in csvRecords) {
+                csvInvoiceNoSet.add(csvRecord["InvoiceNo"])
+
+                val createInvoice = Invoice()
+                createInvoice.invoiceNo = csvRecord["InvoiceNo"]
+                createInvoice.invoiceDate = let { convertDateStrToDate(csvRecord["InvoiceDate"]) }
+                createInvoice.customerId = csvRecord["CustomerID"]
+                createInvoice.country = csvRecord["Country"]
+                createInvoice.stockCode = csvRecord["StockCode"]
+                createInvoice.description = csvRecord["Description"]
+                createInvoice.quantity = csvRecord["Quantity"].toInt()
+                createInvoice.unitPrice = csvRecord["UnitPrice"].toDouble()
+                invoiceList.add(createInvoice)
+            }
+            invoiceRepository?.saveAll(invoiceList);
+
+        } catch (ex: Exception) {
+            logger.error("Error", ex)
+            throw InvoiceException("Failed to upload Invoices");
         }
-        val csvInvoiceNoSet: MutableSet<String?> = HashSet()
-        val invoiceList: MutableList<Invoice> = ArrayList()
 
-        for (csvRecord in csvRecords) {
-            csvInvoiceNoSet.add(csvRecord["InvoiceNo"])
-
-            val createInvoice = Invoice()
-            createInvoice.invoiceNo = csvRecord["InvoiceNo"]
-            createInvoice.invoiceDate = let { convertDateStrToDate(csvRecord["InvoiceDate"]) }
-            createInvoice.customerId = csvRecord["CustomerID"]
-            createInvoice.country = csvRecord["Country"]
-            createInvoice.stockCode = csvRecord["StockCode"]
-            createInvoice.description = csvRecord["Description"]
-            createInvoice.quantity = csvRecord["Quantity"].toInt()
-            createInvoice.unitPrice = csvRecord["UnitPrice"].toDouble()
-            invoiceList.add(createInvoice)
-        }
-        invoiceRepository?.saveAll(invoiceList);
+        logger.info("Service: {}.{} is ended", this.javaClass, "uploadInvoices")
     }
 
     fun convertDateStrToDate(invoiceDate: String): LocalDateTime {
