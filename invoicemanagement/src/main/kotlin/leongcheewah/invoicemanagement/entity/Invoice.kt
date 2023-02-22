@@ -1,9 +1,5 @@
 package leongcheewah.invoicemanagement.entity
 
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Data
-import lombok.NoArgsConstructor
 import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.Column
@@ -16,10 +12,6 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "INVOICE")
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Data
 class Invoice : Serializable {
 
     @Id
