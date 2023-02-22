@@ -25,11 +25,11 @@ class InvoiceService() : IInvoiceService {
     @Autowired
     private val invoiceRepository: InvoiceRepository? = null
 
-    override fun getInvoices(): List<Invoice> {
+    override fun getInvoices(): List<Invoice>? {
         logger.info("Service: {}.{} is started", this.javaClass, "getInvoices")
 
-        var invoiceList: List<Invoice>
-        invoiceList = invoiceRepository?.findAll() as List<Invoice>;
+        var invoiceList: List<Invoice>?
+        invoiceList = invoiceRepository?.findAll() as? List<Invoice>;
 
         logger.info("Service: {}.{} is ended", this.javaClass, "getInvoices")
         return invoiceList

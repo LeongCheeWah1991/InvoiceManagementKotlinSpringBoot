@@ -5,7 +5,7 @@ import leongcheewah.invoicemanagement.model.InvoiceVO
 import org.springframework.web.multipart.MultipartFile
 
 interface IInvoiceService {
-    fun getInvoices() : List<Invoice>
+    fun getInvoices() : List<Invoice>?
 
     fun createInvoice(invoice: InvoiceVO)
 

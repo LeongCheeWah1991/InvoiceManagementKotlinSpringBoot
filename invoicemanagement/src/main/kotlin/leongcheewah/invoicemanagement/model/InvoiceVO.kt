@@ -29,4 +29,23 @@ class InvoiceVO : Serializable {
 
     var unitPrice: Double? = null
 
+    constructor(
+        invoiceNo: String?,
+        invoiceDate: String?,
+        customerId: String?,
+        country: String?,
+        stockCode: String?,
+        description: String?,
+        quantity: Int?,
+        unitPrice: Double?
+    ) {
+        this.invoiceNo = invoiceNo
+        this.invoiceDate = invoiceDate
+        this.customerId = customerId
+        this.country = country
+        this.stockCode = stockCode
+        this.description = description
+        this.quantity = quantity
+        this.unitPrice = unitPrice
+    }
 }

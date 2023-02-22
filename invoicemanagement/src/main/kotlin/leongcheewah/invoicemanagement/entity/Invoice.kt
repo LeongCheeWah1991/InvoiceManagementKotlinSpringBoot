@@ -51,4 +51,27 @@ class Invoice : Serializable {
     @Column
     var unitPrice: Double? = null
 
+    constructor()
+
+    constructor(
+        invoiceId: Int?,
+        invoiceNo: String?,
+        invoiceDate: LocalDateTime?,
+        customerId: String?,
+        country: String?,
+        stockCode: String?,
+        description: String?,
+        quantity: Int?,
+        unitPrice: Double?
+    ) {
+        this.invoiceId = invoiceId
+        this.invoiceNo = invoiceNo
+        this.invoiceDate = invoiceDate
+        this.customerId = customerId
+        this.country = country
+        this.stockCode = stockCode
+        this.description = description
+        this.quantity = quantity
+        this.unitPrice = unitPrice
+    }
 }
