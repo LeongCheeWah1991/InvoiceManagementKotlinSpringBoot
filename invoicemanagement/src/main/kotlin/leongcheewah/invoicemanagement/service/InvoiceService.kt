@@ -4,19 +4,17 @@ import leongcheewah.invoicemanagement.entity.Invoice
 import leongcheewah.invoicemanagement.exception.InvoiceException
 import leongcheewah.invoicemanagement.model.InvoiceVO
 import leongcheewah.invoicemanagement.repository.InvoiceRepository
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
-import org.apache.commons.csv.CSVRecord
+import leongcheewah.invoicemanagement.util.CSVUtil.parseCsv
+import leongcheewah.invoicemanagement.util.CSVUtil.validateCSVFileFormat
+import leongcheewah.invoicemanagement.util.CSVUtil.validateCsvHeaders
+import leongcheewah.invoicemanagement.util.Constants
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
-import java.util.stream.Collectors
 
 
 @Service
@@ -67,7 +65,9 @@ class InvoiceService() : IInvoiceService {
         try {
 
             var csvRecords = parseCsv(file)
-            println(csvRecords?.size)
+            logger.debug("", csvRecords?.size)
+
+            validateCSV(file)
 
             if (csvRecords == null || csvRecords.isEmpty()) {
                 throw InvoiceException("CSV File is empty");
@@ -90,6 +90,9 @@ class InvoiceService() : IInvoiceService {
                 invoiceList.add(createInvoice)
             }
             invoiceRepository?.saveAll(invoiceList);
+        } catch (invEx: InvoiceException) {
+            logger.error("Error", invEx)
+            throw InvoiceException(invEx.errorMsg);
 
         } catch (ex: Exception) {
             logger.error("Error", ex)
@@ -110,19 +113,15 @@ class InvoiceService() : IInvoiceService {
         return formattedDateTime;
     }
 
-    fun parseCsv(file: MultipartFile): List<CSVRecord>? {
-        var csvRecords: List<CSVRecord>? = null
-        try {
-            val fileReader = BufferedReader(InputStreamReader(file.inputStream, "UTF-8"))
-            val csvParser = CSVParser(
-                fileReader,
-                CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim()
-            )
-            csvRecords = csvParser.records
-            csvParser.close()
-        } catch (ex: Exception) {
-            return null
+    fun validateCSV(file: MultipartFile) {
+        if (!validateCSVFileFormat(file)) {
+            throw InvoiceException(Constants.CSV_FILE_FORMAT_NOT_MATCH)
         }
-        return csvRecords
+        if (file.isEmpty) {
+            throw InvoiceException(Constants.CSV_FILE_IS_EMPTY)
+        }
+        if (!validateCsvHeaders(file)) {
+            throw InvoiceException(Constants.CSV_HEADERS_DONT_MATCH_EXPECTED)
+        }
     }
 }
