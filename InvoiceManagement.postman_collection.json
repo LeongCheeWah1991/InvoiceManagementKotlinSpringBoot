@@ -1,0 +1,64 @@
+{
+	"info": {
+		"_postman_id": "8687ed03-59fe-4ea6-a2a0-b886f0f0b4db",
+		"name": "InvoiceManagement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET Mapping (getInvoices)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/invoice/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"invoice",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Mapping (uploadInvoices)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"value": null,
+							"type": "file"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/invoice/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"invoice",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
